@@ -1,0 +1,60 @@
+program HarterHatewayСurve;
+uses graphABC;
+
+const
+  MOVE_DOWN = VK_Down;
+  MOVE_UP = VK_Up;
+  MOVE_LEFT = VK_Left;
+  MOVE_RIGHT = VK_Right;
+  ESCAPE = 27;
+  ZOOM_IN = VK_A;
+  ZOOM_OUT = VK_Z;
+  INCREASE_RECURSION = VK_S;
+  DECREASE_RECURSION = VK_X;
+
+var
+  recursion: integer;
+  fractalX, fractalY, fractalSize: integer;
+
+procedure GenerateHH(startX, startY, endX, endY, recursion: integer);
+begin
+  if recursion > 0 then
+  begin
+    var midX := (startX + endX) div 2 + (endY - startY) div 2;
+    var midY := (startY + endY) div 2 - (endX - startX) div 2;
+    GenerateHH(startX, startY, midX, midY, recursion - 1);
+    GenerateHH(endX, endY, midX, midY, recursion - 1);
+  end
+  else
+    line(startX, startY, endX, endY);
+end;
+
+procedure HandleKeyPress(key: integer);
+begin
+  case key of
+    MOVE_DOWN: fractalY -= 10;
+    MOVE_UP: fractalY += 10;
+    MOVE_LEFT: fractalX += 10;
+    MOVE_RIGHT: fractalX -= 10;
+    ESCAPE: halt(1);
+    ZOOM_IN: if fractalSize < 500 then fractalSize += 10;
+    ZOOM_OUT: if fractalSize > 20 then fractalSize -= 10;
+    INCREASE_RECURSION: if recursion < 15 then recursion += 1;
+    DECREASE_RECURSION: if recursion > 2 then recursion -= 1;
+  end;
+  Window.Clear;
+  GenerateHH(fractalX - fractalSize, fractalY, fractalX + fractalSize, fractalY, recursion);
+  Redraw;
+end;
+
+begin
+  recursion := 10;
+  fractalX := 300;
+  fractalY := 300;
+  fractalSize := 100;
+  SetWindowCaption('Кривая Хартера-Хейтуэя');
+  SetWindowSize(600, 600);
+  LockDrawing;
+  HandleKeyPress(0);
+  OnKeyDown += HandleKeyPress;
+end.
